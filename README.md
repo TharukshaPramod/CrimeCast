@@ -37,5 +37,5 @@ CrimeCast is an advanced machine learning system that predicts arrest probabilit
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/CrimeCast.git
+   git clone https://github.com/TharukshaPramod/CrimeCast.git
    cd CrimeCast
