@@ -13,6 +13,8 @@ import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 import sys
 import os
 
@@ -67,6 +69,23 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+def geocode_address(address):
+    """Convert address to latitude/longitude coordinates"""
+    try:
+        geolocator = Nominatim(user_agent="chicago_crime_predictor")
+        location = geolocator.geocode(address + ", Chicago, IL, USA")
+        
+        if location:
+            return location.latitude, location.longitude, None
+        else:
+            return None, None, "Address not found in Chicago area"
+    except GeocoderTimedOut:
+        return None, None, "Geocoding service timed out. Please try again."
+    except GeocoderServiceError:
+        return None, None, "Geocoding service error. Please try again later."
+    except Exception as e:
+        return None, None, f"Error: {str(e)}"
 
 def load_models():
     """Load trained models and preprocessing objects"""
@@ -210,10 +229,30 @@ def show_prediction_page(predictor, df):
     
     with col1:
         st.subheader("📍 Location Information")
-        latitude = st.number_input("Latitude", value=41.8781, min_value=41.6, max_value=42.1, format="%.6f",
-                                 help="Chicago latitude coordinates (41.6°N to 42.1°N)")
-        longitude = st.number_input("Longitude", value=-87.6298, min_value=-87.95, max_value=-87.5, format="%.6f",
-                                  help="Chicago longitude coordinates (-87.95°W to -87.5°W)")
+        
+        # Address input with geocoding
+        address = st.text_input("Address or Location", 
+                               value="1060 W Addison St",
+                               help="Enter a Chicago address (e.g., '1060 W Addison St' or 'Millennium Park')")
+        
+        if st.button("🔍 Get Coordinates", key="geocode_btn"):
+            with st.spinner("Finding location..."):
+                lat, lon, error = geocode_address(address)
+                if error:
+                    st.error(f"❌ {error}")
+                else:
+                    st.session_state['latitude'] = lat
+                    st.session_state['longitude'] = lon
+                    st.success(f"✓ Found: {lat:.4f}°N, {lon:.4f}°W")
+        
+        latitude = st.number_input("Latitude", 
+                                  value=st.session_state.get('latitude', 41.8781), 
+                                  min_value=41.6, max_value=42.1, format="%.6f",
+                                  help="Chicago latitude coordinates (41.6°N to 42.1°N)")
+        longitude = st.number_input("Longitude", 
+                                   value=st.session_state.get('longitude', -87.6298), 
+                                   min_value=-87.95, max_value=-87.5, format="%.6f",
+                                   help="Chicago longitude coordinates (-87.95°W to -87.5°W)")
         beat = st.number_input("Beat", value=1032, min_value=111, max_value=2535,
                              help="Police beat number (111-2535)")
         district = st.number_input("District", value=10, min_value=1, max_value=31,
