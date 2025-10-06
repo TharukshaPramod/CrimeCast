@@ -1,52 +1,30 @@
-# Virtual environment
+﻿# Large data files
+data/cleaned_crime_data.csv
+
+# Virtual environments
 crime_env/
 .venv/
-venv/
 env/
-ENV/
 
 # Python cache
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+
+# Large DLL files
+*.dll
+
+# Model files (can be regenerated)
+models/
 
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Data files (large datasets)
-data/cleaned_crime_data.csv
-models/*.pkl
-models/*.png
-
-# Jupyter
-.ipynb_checkpoints
-
-# Streamlit
-.streamlit/
-
-# Logs
-*.log
+# Temporary files
+*.tmp
+*.temp

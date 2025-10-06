@@ -1,12 +1,9 @@
-import pandas as pd
+﻿import pandas as pd
 import numpy as np
 import joblib
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
-from sklearn.model_selection import cross_val_score, GridSearchCV
 from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
-from xgboost import XGBClassifier
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -17,12 +14,11 @@ class CrimePredictor:
         self.best_score = 0
         
     def initialize_models(self):
-        """Initialize multiple ML models"""
+        """Initialize ML models without xgboost for deployment"""
         self.models = {
-            'Random Forest': RandomForestClassifier(n_estimators=100, random_state=42),
-            'XGBoost': XGBClassifier(random_state=42, eval_metric='logloss'),
+            'Random Forest': RandomForestClassifier(n_estimators=50, random_state=42),
             'Logistic Regression': LogisticRegression(random_state=42, max_iter=1000),
-            'Gradient Boosting': GradientBoostingClassifier(random_state=42)
+            'Gradient Boosting': GradientBoostingClassifier(random_state=42, n_estimators=50)
         }
     
     def train_models(self, X_train, y_train, X_test, y_test):
@@ -51,7 +47,6 @@ class CrimePredictor:
                 'probabilities': y_pred_proba
             }
             
-            # Fixed the formatting issue here
             auc_display = f"{auc:.4f}" if auc is not None else "N/A"
             print(f"   ✅ {name} - Accuracy: {accuracy:.4f}, AUC: {auc_display}")
             
@@ -77,7 +72,6 @@ class CrimePredictor:
         print(f"✅ Model loaded from {filepath}")
         return self.best_model
 
-# ADD THIS CLASS FOR COMPATIBILITY
 class ModelTrainer:
     def __init__(self):
         self.crime_predictor = CrimePredictor()
@@ -89,7 +83,6 @@ class ModelTrainer:
         """Train models using CrimePredictor"""
         self.crime_predictor.initialize_models()
         
-        # Use a validation split for evaluation during training
         from sklearn.model_selection import train_test_split
         X_tr, X_val, y_tr, y_val = train_test_split(
             X_train, y_train, test_size=0.2, random_state=42, stratify=y_train
@@ -104,5 +97,5 @@ class ModelTrainer:
         return results
     
     def get_best_model(self, models, X_test, y_test):
-        """Get the best model - interface compatibility"""
+        """Get the best model"""
         return self.best_model_name, self.best_model
