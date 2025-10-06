@@ -1,3 +1,0 @@
-﻿# streamlit.shim.yaml
-# Force Streamlit to use pip instead of uv
-installer: pip
