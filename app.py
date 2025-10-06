@@ -116,6 +116,47 @@ def load_models():
         st.error(f"Error loading models: {e}")
         return None
 
+@st.cache_data
+def load_data():
+    """Load data with multiple fallback options for Streamlit Cloud"""
+    try:
+        # Try multiple possible paths
+        possible_paths = [
+            # Streamlit Cloud structure
+            'data/cleaned_crime_data.csv',
+            './data/cleaned_crime_data.csv',
+            '../data/cleaned_crime_data.csv',
+            # Absolute path based on current file
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'cleaned_crime_data.csv'),
+        ]
+        
+        for path in possible_paths:
+            try:
+                if os.path.exists(path):
+                    df = pd.read_csv(path)
+                    print(f"✅ Data loaded successfully from: {path}")
+                    return df
+            except Exception as e:
+                continue
+        
+        # If all paths fail, show debug info
+        st.error("❌ Data file not found in any location")
+        st.write("### 🔍 Debug Information:")
+        st.write(f"Current directory: {os.getcwd()}")
+        st.write(f"Script directory: {os.path.dirname(os.path.abspath(__file__))}")
+        st.write("Files in current directory:", [f for f in os.listdir('.') if not f.startswith('.')])
+        
+        if os.path.exists('data'):
+            st.write("Files in data directory:", os.listdir('data'))
+        else:
+            st.write("❌ 'data' directory does not exist")
+            
+        return None
+        
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
+        return None
+
 def main():
     # Header with custom styling
     st.markdown(f'<h1 class="main-header">{APP_TITLE}</h1>', unsafe_allow_html=True)
@@ -128,15 +169,7 @@ def main():
     # Remove emoji for page selection
     page_clean = page[2:]  # Remove emoji and space
     
-    # Load data
-    @st.cache_data
-    def load_data():
-        try:
-            return pd.read_csv("data/cleaned_crime_data.csv")
-        except Exception as e:
-            st.error(f"Error loading data: {e}")
-            return None
-    
+    # Load data and models
     df = load_data()
     predictor = load_models()
     
@@ -225,6 +258,8 @@ def show_home_page(df):
                 st.info(f"🔍 Most common crime: {top_crime}")
             else:
                 st.info("🔍 Crime data loaded successfully")
+        else:
+            st.info("🔍 Data loading: Check data file path")
 
 def show_prediction_page(predictor, df):
     """Page for making crime predictions with enhanced UI"""
