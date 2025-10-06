@@ -1,4 +1,4 @@
-﻿# Large data files
+# Large data files
 data/cleaned_crime_data.csv
 
 # Virtual environments
@@ -14,8 +14,13 @@ __pycache__/
 # Large DLL files
 *.dll
 
-# Model files (can be regenerated)
-models/
+# Large model files (exclude from git)
+models/best_model_arrest.pkl
+models/*.png
+
+# Keep small model files (include in git)
+!models/feature_scaler.pkl
+!models/label_encoders.pkl
 
 # IDE
 .vscode/
