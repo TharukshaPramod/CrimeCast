@@ -1,6 +1,6 @@
 streamlit==1.28.0
 pandas==2.2.3
-numpy==2.0.2
+numpy<2.0  # Use NumPy 1.x for compatibility
 scikit-learn==1.5.2
 matplotlib==3.10.0
 seaborn==0.13.2
