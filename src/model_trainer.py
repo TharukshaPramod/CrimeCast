@@ -76,3 +76,33 @@ class CrimePredictor:
         self.best_model = joblib.load(filepath)
         print(f"✅ Model loaded from {filepath}")
         return self.best_model
+
+# ADD THIS CLASS FOR COMPATIBILITY
+class ModelTrainer:
+    def __init__(self):
+        self.crime_predictor = CrimePredictor()
+        self.best_model = None
+        self.best_model_name = None
+        self.best_score = 0
+    
+    def train_models(self, X_train, y_train):
+        """Train models using CrimePredictor"""
+        self.crime_predictor.initialize_models()
+        
+        # Use a validation split for evaluation during training
+        from sklearn.model_selection import train_test_split
+        X_tr, X_val, y_tr, y_val = train_test_split(
+            X_train, y_train, test_size=0.2, random_state=42, stratify=y_train
+        )
+        
+        results = self.crime_predictor.train_models(X_tr, y_tr, X_val, y_val)
+        
+        self.best_model = self.crime_predictor.best_model
+        self.best_model_name = self.crime_predictor.best_model_name
+        self.best_score = self.crime_predictor.best_score
+        
+        return results
+    
+    def get_best_model(self, models, X_test, y_test):
+        """Get the best model - interface compatibility"""
+        return self.best_model_name, self.best_model

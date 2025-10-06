@@ -3,6 +3,7 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 from sklearn.metrics import confusion_matrix, classification_report
+import joblib
 
 def plot_feature_importance(model, feature_names, top_n=10):
     """Plot feature importance for tree-based models"""
@@ -44,3 +45,34 @@ def generate_model_report(results, y_test):
         }
     
     return report
+
+# ADD MISSING FUNCTIONS FOR COMPATIBILITY
+def save_model(model, filepath):
+    """Save model to file"""
+    joblib.dump(model, filepath)
+    print(f"💾 Model saved to {filepath}")
+
+def load_model(filepath):
+    """Load model from file"""
+    model = joblib.load(filepath)
+    print(f"✅ Model loaded from {filepath}")
+    return model
+
+def evaluate_model(model, X_test, y_test):
+    """Evaluate model performance"""
+    from sklearn.metrics import accuracy_score, roc_auc_score
+    
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    
+    if hasattr(model, "predict_proba"):
+        y_pred_proba = model.predict_proba(X_test)[:, 1]
+        auc = roc_auc_score(y_test, y_pred_proba)
+    else:
+        auc = None
+    
+    return {
+        'accuracy': accuracy,
+        'auc': auc,
+        'predictions': y_pred
+    }

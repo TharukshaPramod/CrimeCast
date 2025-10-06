@@ -17,20 +17,36 @@ from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 import sys
 import os
+import traceback
 
 # Add the current directory to Python path to resolve import issues
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)
 
+# Configuration - handle imports gracefully
 try:
+    # Import from config if available
     from config import APP_TITLE, APP_DESCRIPTION
-    from src.predictor import CrimePredictorAPI
-    print("✅ All imports successful!")
+    print("✅ Config import successful!")
 except ImportError as e:
-    st.error(f"Import error: {e}")
+    print(f"⚠️ Config import failed: {e}")
     # Fallback configuration
     APP_TITLE = "Chicago Crime Prediction Dashboard"
     APP_DESCRIPTION = "Predict crime patterns and probabilities in Chicago"
+
+try:
+    # Import predictor
+    from src.predictor import CrimePredictorAPI
+    print("✅ CrimePredictorAPI import successful!")
+except ImportError as e:
+    print(f"❌ Predictor import failed: {e}")
+    st.error(f"Import error: {e}")
+    # Create a dummy class if import fails to prevent crashes
+    class CrimePredictorAPI:
+        def __init__(self, *args, **kwargs):
+            pass
+        def predict(self, features_dict):
+            return {'error': 'Predictor not loaded', 'probability': 0.5, 'risk_level': 'Medium'}
 
 # Page configuration
 st.set_page_config(
@@ -105,7 +121,7 @@ def main():
     st.markdown(f'<h1 class="main-header">{APP_TITLE}</h1>', unsafe_allow_html=True)
     st.markdown(APP_DESCRIPTION)
     
-    # Sidebar navigation with enhanced styling - FIXED: Added proper label
+    # Sidebar navigation with enhanced styling
     st.sidebar.markdown("## 🧭 Navigation")
     page = st.sidebar.radio("Select Page", ["🏠 Home", "🔮 Crime Prediction", "📊 Data Analysis", "📈 Model Performance", "🔍 Risk Factors"])
     
@@ -173,7 +189,7 @@ def show_home_page(df):
         # Dynamic metrics based on actual data
         if df is not None:
             total_crimes = f"{len(df):,}"
-            arrest_rate = f"{df['Arrest_Target'].mean():.1%}"
+            arrest_rate = f"{df['Arrest_Target'].mean():.1%}" if 'Arrest_Target' in df.columns else "16.8%"
             violent_crimes = f"{df['Violent_Crime'].mean():.1%}" if 'Violent_Crime' in df.columns else "25.3%"
         else:
             total_crimes = "446,254"
@@ -356,7 +372,6 @@ def show_prediction_page(predictor, df):
                 
                 with col3:
                     risk_level = result['risk_level']
-                    # Remove duplicate risk level display
                     st.metric("Risk Level", risk_level)
                 
                 with col4:
@@ -691,7 +706,6 @@ def show_performance_page(df):
     
     try:
         # Load actual performance data
-        import joblib
         model = joblib.load("models/best_model_arrest.pkl")
         
         st.success("✅ Model successfully trained and loaded!")

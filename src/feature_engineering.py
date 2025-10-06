@@ -38,3 +38,16 @@ def create_feature_set(df, target_type='arrest'):
     X_processed, label_encoders, scaler = preprocess_features(X, y, CATEGORICAL_FEATURES)
     
     return X_processed, y, label_encoders, scaler
+
+# ADD THIS CLASS FOR COMPATIBILITY
+class FeatureEngineer:
+    def __init__(self):
+        self.scaler = None
+        self.label_encoders = {}
+    
+    def fit_transform(self, df, target_type='arrest'):
+        """Wrapper for create_feature_set to match expected interface"""
+        X, y, label_encoders, scaler = create_feature_set(df, target_type)
+        self.scaler = scaler
+        self.label_encoders = label_encoders
+        return X, y
