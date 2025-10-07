@@ -9,5 +9,5 @@ geopy==2.4.1
 joblib==1.4.2
 # Add to your requirements.txt
 bcrypt==4.0.1
-pillow==10.0.0
+pillow>=10.2.0
 streamlit-authenticator==0.2.1
