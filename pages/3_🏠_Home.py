@@ -4,6 +4,9 @@ import os
 import sys
 from datetime import datetime
 
+# Set page config FIRST - before any other Streamlit commands
+st.set_page_config(page_title="Dashboard - CrimeCast", layout="wide")
+
 # Add parent directory to path for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -128,7 +131,7 @@ def safe_page_navigation(page_name):
 
 @login_required
 def main():
-    st.set_page_config(page_title="Dashboard - CrimeCast", layout="wide")
+    # st.set_page_config REMOVED from here - now at the top of the file
     
     user = get_current_user()
     
