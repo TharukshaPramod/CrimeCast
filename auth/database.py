@@ -219,5 +219,58 @@ class UserDatabase:
         except Exception as e:
             return False, f"Error deleting user: {str(e)}"
 
+    def toggle_user_active_status(self, user_id, is_active):
+        """Toggle user active status"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE users SET is_active = ? WHERE id = ?
+            ''', (is_active, user_id))
+            conn.commit()
+            conn.close()
+            
+            status_text = "activated" if is_active else "deactivated"
+            self.log_action(user_id, "USER_STATUS_CHANGE", f"User {status_text}")
+            return True, f"User {status_text} successfully"
+        except Exception as e:
+            return False, f"Error updating user status: {str(e)}"
+    
+    def change_user_password(self, user_id, new_password):
+        """Change user password"""
+        try:
+            hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('''
+                UPDATE users SET password = ? WHERE id = ?
+            ''', (hashed_password, user_id))
+            conn.commit()
+            conn.close()
+            
+            self.log_action(user_id, "PASSWORD_CHANGE", "User password changed")
+            return True, "Password changed successfully"
+        except Exception as e:
+            return False, f"Error changing password: {str(e)}"
+    
+    def get_access_logs(self, limit=100):
+        """Get access logs from database"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT al.id, al.user_id, al.action, al.page, al.timestamp, al.ip_address, u.email
+                FROM access_logs al
+                LEFT JOIN users u ON al.user_id = u.id
+                ORDER BY al.timestamp DESC
+                LIMIT ?
+            ''', (limit,))
+            logs = cursor.fetchall()
+            conn.close()
+            return logs
+        except Exception as e:
+            print(f"Error getting access logs: {e}")
+            return []
+
 # Global database instance
 user_db = UserDatabase()
