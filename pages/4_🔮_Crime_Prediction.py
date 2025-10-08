@@ -97,6 +97,28 @@ def get_feature_importance(predictor, features):
             'Community Area': 0.1
         }
 
+def get_prediction_reliability(probability):
+    """Convert confidence score to police-friendly reliability rating"""
+    if probability >= 0.9:
+        return "🟢 HIGH RELIABILITY", "Very reliable prediction based on strong patterns"
+    elif probability >= 0.7:
+        return "🟡 MODERATE RELIABILITY", "Good reliability with consistent patterns"
+    elif probability >= 0.5:
+        return "🟠 FAIR RELIABILITY", "Moderate reliability with some uncertainty"
+    else:
+        return "🔴 LOW RELIABILITY", "Lower reliability - consider additional factors"
+
+def get_operational_priority(probability, risk_level):
+    """Convert to police operational priority"""
+    if risk_level == "High" and probability >= 0.7:
+        return "🚨 IMMEDIATE ACTION", "High probability arrest scenario - prioritize response"
+    elif risk_level == "High" or probability >= 0.6:
+        return "⚠️ INCREASED VIGILANCE", "Monitor closely and prepare for potential action"
+    elif risk_level == "Medium" or probability >= 0.4:
+        return "👀 STANDARD MONITORING", "Maintain regular patrol awareness"
+    else:
+        return "✅ ROUTINE PATROL", "Normal patrol operations sufficient"
+
 @login_required
 def main():
     st.set_page_config(page_title="Crime Prediction - CrimeCast", layout="wide")
@@ -213,6 +235,10 @@ def main():
             if 'error' not in result:
                 st.success("🎉 Prediction Completed!")
                 
+                # Get police-friendly metrics
+                reliability_level, reliability_desc = get_prediction_reliability(result['probability'])
+                operational_priority, priority_desc = get_operational_priority(result['probability'], result['risk_level'])
+                
                 # Display results
                 st.subheader("📊 Prediction Results")
                 col1, col2, col3, col4 = st.columns(4)
@@ -229,8 +255,20 @@ def main():
                     st.metric("Risk Level", result['risk_level'])
                 
                 with col4:
-                    confidence = result['probability'] * 100
-                    st.metric("Confidence Score", f"{confidence:.1f}%")
+                    # Replaced "Confidence Score" with "Prediction Reliability"
+                    st.metric("Prediction Reliability", reliability_level)
+                
+                # Operational Priority Section
+                st.subheader("🎯 Operational Assessment")
+                priority_col1, priority_col2 = st.columns(2)
+                
+                with priority_col1:
+                    st.info(f"**Operational Priority**: {operational_priority}")
+                    st.write(f"*{priority_desc}*")
+                
+                with priority_col2:
+                    st.info(f"**Prediction Reliability**: {reliability_level}")
+                    st.write(f"*{reliability_desc}*")
                 
                 # Visualization
                 st.subheader("📈 Probability Visualization")
@@ -258,7 +296,7 @@ def main():
                 
                 st.pyplot(fig)
                 
-                # KEY FACTORS SECTION - RESTORED
+                # KEY FACTORS SECTION
                 st.subheader("🔑 Key Factors Influencing This Prediction")
                 
                 # Get feature importance
@@ -320,28 +358,41 @@ def main():
                     else:
                         st.info("📊 No significant risk factors identified for this scenario.")
                     
-                    # Recommendations
-                    st.markdown("### 🛡️ Safety Recommendations")
-                    if result['risk_level'] == 'High':
-                        st.warning("""
-                        - 🚨 Consider increased patrol presence
-                        - 📱 Ensure emergency contacts are accessible
-                        - 🎯 Focus on high-visibility policing
-                        - 🔄 Monitor the area frequently
+                    # Recommendations based on operational priority
+                    st.markdown("### 🛡️ Operational Recommendations")
+                    if "IMMEDIATE ACTION" in operational_priority:
+                        st.error("""
+                        **🚨 IMMEDIATE ACTION REQUIRED:**
+                        - Increase patrol presence immediately
+                        - Deploy additional units to area
+                        - Activate surveillance if available
+                        - Prepare for rapid response
+                        - Notify command center
                         """)
-                    elif result['risk_level'] == 'Medium':
+                    elif "INCREASED VIGILANCE" in operational_priority:
+                        st.warning("""
+                        **⚠️ INCREASED VIGILANCE:**
+                        - Maintain visible patrol presence
+                        - Conduct frequent area checks
+                        - Monitor for suspicious activity
+                        - Document all observations
+                        - Stay alert for escalation
+                        """)
+                    elif "STANDARD MONITORING" in operational_priority:
                         st.info("""
-                        - 👀 Maintain regular patrol patterns
-                        - 📊 Continue standard monitoring
-                        - 🔔 Stay alert for unusual activity
-                        - 📝 Document any incidents
+                        **👀 STANDARD MONITORING:**
+                        - Continue regular patrol patterns
+                        - Maintain situational awareness
+                        - Report any unusual activity
+                        - Engage with community members
                         """)
                     else:
                         st.success("""
-                        - ✅ Normal patrol operations sufficient
-                        - 📋 Continue community engagement
-                        - 🎓 Focus on preventive measures
-                        - 🌟 Maintain current safety protocols
+                        **✅ ROUTINE PATROL:**
+                        - Normal patrol operations sufficient
+                        - Focus on community engagement
+                        - Continue preventive measures
+                        - Maintain standard protocols
                         """)
                 
             else:
