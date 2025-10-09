@@ -12,8 +12,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-from auth.auth_utils import is_authenticated, is_admin
-from auth.decorators import admin_required
+from auth.auth_utils import is_authenticated, is_admin, get_current_user, login_required
 
 @st.cache_data
 def load_data():
@@ -53,7 +52,7 @@ def safe_plotly_chart(fig, **kwargs):
     except Exception as e:
         st.error(f"Chart error: {e}")
 
-@admin_required
+@login_required
 def main():
     st.set_page_config(
         page_title="Data Analysis - CrimeCast", 
@@ -62,7 +61,6 @@ def main():
     )
     
     st.header("📊 Advanced Crime Data Analysis")
-    st.info("🔒 Admin Access: Comprehensive data analysis tools")
     
     # Load data with progress indicator
     with st.spinner("Loading crime data..."):

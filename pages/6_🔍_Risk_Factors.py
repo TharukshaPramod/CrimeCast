@@ -11,8 +11,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-from auth.auth_utils import is_authenticated, is_admin
-from auth.decorators import admin_required
+from auth.auth_utils import is_authenticated, is_admin, get_current_user, login_required
 from src.predictor import CrimePredictorAPI
 
 @st.cache_data
@@ -47,12 +46,11 @@ def load_predictor():
     except Exception:
         return None
 
-@admin_required
+@login_required
 def main():
     st.set_page_config(page_title="Risk Factors - CrimeCast", layout="wide")
     
     st.header("🔍 Risk Factor Analysis")
-    st.info("🔒 Admin Access: Risk factor analysis and exploration")
     
     df = load_data()
     predictor = load_predictor()
