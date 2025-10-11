@@ -1,0 +1,32 @@
+{
+  "best_model": "Gradient Boosting",
+  "best_score": 0.741580111000556,
+  "model_performance": {
+    "Random Forest": {
+      "accuracy": 0.8430605819542638,
+      "auc": 0.728220876397218,
+      "has_model": true
+    },
+    "Logistic Regression": {
+      "accuracy": 0.8324836696507603,
+      "auc": 0.6427098395809443,
+      "has_model": true
+    },
+    "Gradient Boosting": {
+      "accuracy": 0.8472061937681371,
+      "auc": 0.741580111000556,
+      "has_model": true
+    },
+    "XGBoost": {
+      "accuracy": 0.8469596979305554,
+      "auc": 0.7415559864332053,
+      "has_model": true
+    }
+  },
+  "models_trained": [
+    "Random Forest",
+    "Logistic Regression",
+    "Gradient Boosting",
+    "XGBoost"
+  ]
+}
